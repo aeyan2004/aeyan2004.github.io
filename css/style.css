@@ -370,6 +370,16 @@ h1 {
   margin-bottom: 24px;
 }
 
+.big .word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.big .vp {
+  display: inline-block;
+  font-variation-settings: "wght" 500;
+}
+
 .grid {
   display: grid;
   gap: 32px;

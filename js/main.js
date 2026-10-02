@@ -248,6 +248,60 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
 
 
 // ---------------------------------------------------------------------
+// 8b. SECTION TITLES: variable proximity (letters swell near the mouse)
+// ---------------------------------------------------------------------
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const FROM = 500, TO = 900, RADIUS = 100;   // weight range, and how far the effect reaches (px)
+
+  const titles = [...document.querySelectorAll('.big')].map(el => {
+    const text = el.textContent.trim();
+    el.setAttribute('aria-label', text);
+    el.textContent = '';
+
+    text.split(' ').forEach((word, wi, all) => {
+      const w = document.createElement('span');
+      w.className = 'word';
+      w.setAttribute('aria-hidden', 'true');
+      [...word].forEach(ch => {
+        const s = document.createElement('span');
+        s.className = 'vp';
+        s.textContent = ch;
+        w.appendChild(s);
+      });
+      el.appendChild(w);
+      if (wi < all.length - 1) el.appendChild(document.createTextNode(' '));
+    });
+
+    return { el, letters: [...el.querySelectorAll('.vp')], lit: false };
+  });
+
+  let mx = -1e4, my = -1e4, queued = false;
+
+  const update = () => {
+    queued = false;
+    titles.forEach(t => {
+      const box = t.el.getBoundingClientRect();
+      const near = mx > box.left - RADIUS && mx < box.right + RADIUS && my > box.top - RADIUS && my < box.bottom + RADIUS;
+      if (!near && !t.lit) return;            // far-away titles cost nothing
+      t.lit = near;
+      t.letters.forEach(l => {
+        const r = l.getBoundingClientRect();
+        const d = Math.hypot(mx - (r.left + r.width / 2), my - (r.top + r.height / 2));
+        const k = near ? Math.max(0, 1 - d / RADIUS) : 0;       // linear falloff
+        l.style.fontVariationSettings = `'wght' ${Math.round(FROM + (TO - FROM) * k)}`;
+      });
+    });
+  };
+  const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+
+  addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; queue(); });
+  addEventListener('touchmove', e => { mx = e.touches[0].clientX; my = e.touches[0].clientY; queue(); }, { passive: true });
+  addEventListener('scroll', queue, { passive: true });
+  document.documentElement.addEventListener('mouseleave', () => { mx = my = -1e4; queue(); });
+}
+
+
+// ---------------------------------------------------------------------
 // 9. REVEAL ON SCROLL
 // ---------------------------------------------------------------------
 const reveals = document.querySelectorAll(
@@ -347,7 +401,7 @@ if (c && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
   if (!gl) return;
 
   // your React Bits settings
-  const P = { timeScale: 0.2, height: 3.8, baseWidth: 5.7, scale: 5, hueShift: -0.0416, colorFrequency: 2, noise: 0, glow: 0.5 };
+  const P = { timeScale: 0.2, height: 3.8, baseWidth: 5.7, scale: 5, hueShift: 1, colorFrequency: 1, noise: 0, glow: 0.5 };
 
   const FS = `
 precision highp float;
@@ -386,7 +440,7 @@ void main() {
   // around its faces. The color shifts with distance from the surface, which
   // spreads the light into a blurry spectrum.
   float k = 2.0 - uGlow * 1.8;            // glow softness (higher "glow" = wider, softer)
-  float hue = uHue + uTime * 0.15;
+  float hue = uHue / 6.2831853 + uTime * 0.15;   // hueShift is in radians (1 = about 57 degrees)
   float t = 0.0;
   vec3 acc = vec3(0.0);
   for (int i = 0; i < 64; i++) {
@@ -394,7 +448,8 @@ void main() {
     float d = map(p);
     float dt = max(abs(d) * 0.5, 0.12);
     float h = hue + uFreq * (0.10 * d + 0.05 * (R * p).y + 0.03 * p.x);
-    acc += hsv(h, 0.75, 1.0) * exp(-abs(d) * k) * dt;
+    float base = 1.0 - smoothstep(-0.5 * uHeight, 0.1 * uHeight, (R * p).y);   // 1 at the bottom of the prism, 0 above
+    acc += mix(hsv(h, 0.75, 1.0), vec3(1.0), base * 0.85) * exp(-abs(d) * k) * dt;   // white light at the base, spectrum above
     t += dt;
     if (t > 24.0) break;
   }
@@ -402,7 +457,7 @@ void main() {
   vec3 col = 1.0 - exp(-acc * 0.25);      // 0.25 = brightness of the glow
   col += (hash(gl_FragCoord.xy + floor(uTime * 60.0) * uNoise) - 0.5) * (0.006 + uNoise * 0.1);   // dither: no banding
   float vig = smoothstep(1.4, 0.15, length(uv));
-  gl_FragColor = vec4(vec3(0.063) + col * 0.55 * vig, 1.0);   // 0.55 = overall brightness
+  gl_FragColor = vec4(vec3(0.063) + col * 0.44 * vig, 1.0);   // 0.44 = overall brightness (was 0.55)
 }`;
 
   const compile = (type, src) => {
@@ -495,16 +550,31 @@ if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
     cur.classList.add('on');
   };
 
-  // after a page switch, show the cursor right where the mouse was left
-  if (pos) place(pos[0], pos[1], document.elementFromPoint(pos[0], pos[1]));
   addEventListener('pagehide', () => { try { if (pos) sessionStorage.cursorPos = JSON.stringify(pos); } catch (_) {} });
-  addEventListener('mousemove', e => place(e.clientX, e.clientY, e.target));
+
+  // double click, right click and dragging bring up the real cursor, so the arrow
+  // fades out and stays hidden until the mouse has moved a little
+  let hold = null;
+  const holdHidden = e => { hold = [e.clientX, e.clientY]; hide(); };
+  addEventListener('mousemove', e => {
+    if (hold) {
+      if (Math.hypot(e.clientX - hold[0], e.clientY - hold[1]) < 12) return;
+      hold = null;
+    }
+    // dragging to select text: the real cursor takes over, so the arrow stays hidden
+    if (e.buttons & 1 && !getSelection().isCollapsed) return hide();
+    place(e.clientX, e.clientY, e.target);
+  });
+  addEventListener('contextmenu', holdHidden);
+  addEventListener('dblclick', holdHidden);
+  addEventListener('dragstart', holdHidden);
 
   // fade out when the mouse leaves the page or the window loses focus (e.g. clicking into a video)
   document.addEventListener('mouseout', e => { if (!e.relatedTarget || e.relatedTarget.nodeName === 'IFRAME') hide(); });
   addEventListener('blur', hide);
 
   addEventListener('mousedown', e => {
+    if (e.button === 2 || e.detail > 1) return holdHidden(e);   // right / double click: no ripple, fade out
     cur.classList.add('down');
     const r = document.createElement('div');
     r.className = 'ripple';
@@ -515,6 +585,7 @@ if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
   });
 
   addEventListener('mouseup', () => cur.classList.remove('down'));
+  addEventListener('dragend', () => cur.classList.remove('down'));
 }
 
 
