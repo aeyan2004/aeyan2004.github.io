@@ -9,13 +9,12 @@
      3. NAVBAR: [ae] logo scrolls to the top
      4. NAVBAR: highlight the section in view
      5. NAVBAR: mark the current page
-     6. THEME SWITCHER: solarized / light / dark
+     6. THEME SWITCHER: solarized (dark) / light / dark
      7. HERO: headline letters pop in
      8. HERO: typing effect
      9. REVEAL ON SCROLL
      10. SCROLL PROGRESS BAR
      11. SKILLS BACKGROUND: letter-glitch canvas
-     12. DARK-MODE BACKGROUND: WebGL prism
      13. CUSTOM ARROW CURSOR
      14. SOCIAL LOGOS
    ===================================================================== */
@@ -24,6 +23,18 @@
 // 0. SHARED
 // ---------------------------------------------------------------------
 const root = document.documentElement;   // <html>: holds data-theme and the loader state classes
+
+// <html data-switching> is on while a big animation runs (intro loader, theme reveal).
+// PrismBackground.jsx waits for the "uisettled" event before starting its WebGL work,
+// so the shader compile never lands in the middle of an animation.
+let pending = 0;
+const busy = () => { pending++; root.setAttribute('data-switching', ''); };
+const settled = () => {
+  if (--pending > 0) return;
+  pending = 0;
+  root.removeAttribute('data-switching');
+  dispatchEvent(new Event('uisettled'));
+};
 
 
 // ---------------------------------------------------------------------
@@ -43,6 +54,7 @@ const loader = document.getElementById('loader');
 
 if (loader && root.classList.contains('seen')) loader.remove();
 else if (loader) {
+  busy();
   const letters = [...loader.querySelectorAll('h2 span')];
   const sun = loader.querySelector('.sun');
   const ring = loader.querySelector('.orbit');
@@ -58,6 +70,7 @@ else if (loader) {
   const finish = () => loaded.then(() => {
     loader.classList.add('done');
     root.classList.add('ready');
+    settled();
     try { sessionStorage.seen = 1; } catch (_) {}
     setTimeout(() => loader.remove(), 1000);
   });
@@ -147,15 +160,15 @@ document.querySelectorAll('section[id]').forEach(s => so.observe(s));
 // ---------------------------------------------------------------------
 // 5. NAVBAR: mark the current page
 // ---------------------------------------------------------------------
+const cleanPath = s => s.replace(/index\.html$/, '').replace(/\.html$/, '').replace(/\/+$/, '') || '/';
 links.forEach(a => {
-  const p = location.pathname;
   if (a.getAttribute('href').startsWith('#')) return;
-  if (a.pathname === p || (p.endsWith('/') && a.pathname.endsWith('index.html'))) a.classList.add('page');
+  if (cleanPath(a.pathname) === cleanPath(location.pathname)) a.classList.add('page');
 });
 
 
 // ---------------------------------------------------------------------
-// 6. THEME SWITCHER: solarized / light / dark
+// 6. THEME SWITCHER: solarized (dark) / light / dark
 // ---------------------------------------------------------------------
 const ORDER = ['solarized', 'light', 'dark'];
 if (!ORDER.includes(root.dataset.theme)) root.dataset.theme = 'solarized';
@@ -184,10 +197,13 @@ tbtns.forEach(b => b.addEventListener('click', () => {
   const y = k.top + k.height / 2;
   const rad = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
 
-  document.startViewTransition(apply).ready.then(() => root.animate(
+  busy();
+  const vt = document.startViewTransition(apply);
+  vt.finished.then(settled, settled);
+  vt.ready.then(() => root.animate(
     { clipPath: [`circle(0 at ${x}px ${y}px)`, `circle(${rad}px at ${x}px ${y}px)`] },
     { duration: 800, easing: 'ease-in-out', pseudoElement: '::view-transition-new(root)' }
-  ));
+  )).catch(() => {});
 }));
 
 
@@ -244,60 +260,6 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
     i += del ? -1 : 1;
     setTimeout(type, del ? 35 : 70);
   })();
-}
-
-
-// ---------------------------------------------------------------------
-// 8b. SECTION TITLES: variable proximity (letters swell near the mouse)
-// ---------------------------------------------------------------------
-if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  const FROM = 500, TO = 900, RADIUS = 100;   // weight range, and how far the effect reaches (px)
-
-  const titles = [...document.querySelectorAll('.big')].map(el => {
-    const text = el.textContent.trim();
-    el.setAttribute('aria-label', text);
-    el.textContent = '';
-
-    text.split(' ').forEach((word, wi, all) => {
-      const w = document.createElement('span');
-      w.className = 'word';
-      w.setAttribute('aria-hidden', 'true');
-      [...word].forEach(ch => {
-        const s = document.createElement('span');
-        s.className = 'vp';
-        s.textContent = ch;
-        w.appendChild(s);
-      });
-      el.appendChild(w);
-      if (wi < all.length - 1) el.appendChild(document.createTextNode(' '));
-    });
-
-    return { el, letters: [...el.querySelectorAll('.vp')], lit: false };
-  });
-
-  let mx = -1e4, my = -1e4, queued = false;
-
-  const update = () => {
-    queued = false;
-    titles.forEach(t => {
-      const box = t.el.getBoundingClientRect();
-      const near = mx > box.left - RADIUS && mx < box.right + RADIUS && my > box.top - RADIUS && my < box.bottom + RADIUS;
-      if (!near && !t.lit) return;            // far-away titles cost nothing
-      t.lit = near;
-      t.letters.forEach(l => {
-        const r = l.getBoundingClientRect();
-        const d = Math.hypot(mx - (r.left + r.width / 2), my - (r.top + r.height / 2));
-        const k = near ? Math.max(0, 1 - d / RADIUS) : 0;       // linear falloff
-        l.style.fontVariationSettings = `'wght' ${Math.round(FROM + (TO - FROM) * k)}`;
-      });
-    });
-  };
-  const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
-
-  addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; queue(); });
-  addEventListener('touchmove', e => { mx = e.touches[0].clientX; my = e.touches[0].clientY; queue(); }, { passive: true });
-  addEventListener('scroll', queue, { passive: true });
-  document.documentElement.addEventListener('mouseleave', () => { mx = my = -1e4; queue(); });
 }
 
 
@@ -383,153 +345,18 @@ init();
 window.addEventListener('resize', init);
 
 if (c && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  // only animate while the canvas is on screen and the tab is visible
+  let glitchOn = true;
+  new IntersectionObserver(([e]) => { glitchOn = e.isIntersecting; }).observe(c);
+
   setInterval(() => {
+    if (!glitchOn || document.hidden) return;
     for (let i = 0; i < cells.length * 0.04; i++) {
       cells[Math.floor(Math.random() * cells.length)] = { ch: pick(CHARS), color: pick(COLORS) };
     }
     draw();
   }, 60);
 }
-
-
-// ---------------------------------------------------------------------
-// 12. DARK-MODE BACKGROUND: WebGL prism
-// ---------------------------------------------------------------------
-(() => {
-  const cv = document.getElementById('prism');
-  const gl = cv && cv.getContext('webgl', { alpha: false, antialias: false });
-  if (!gl) return;
-
-  // your React Bits settings
-  const P = { timeScale: 0.2, height: 3.8, baseWidth: 5.7, scale: 5, hueShift: 1, colorFrequency: 1, noise: 0, glow: 0.5 };
-
-  const FS = `
-precision highp float;
-uniform vec2 uRes, uRot;
-uniform float uTime, uHeight, uBase, uScale, uHue, uFreq, uGlow, uNoise;
-mat3 R;
-
-vec3 hsv(float h, float s, float v) {
-  vec3 k = clamp(abs(fract(h + vec3(0.0, 2.0 / 3.0, 1.0 / 3.0)) * 6.0 - 3.0) - 1.0, 0.0, 1.0);
-  return v * mix(vec3(1.0), k, s);
-}
-
-float map(vec3 p) {                       // square pyramid (signed distance)
-  p = R * p;
-  float h = uHeight, b = uBase * 0.5;
-  float t = (p.y + 0.5 * h) / h;
-  float k = h / sqrt(h * h + b * b);
-  float dx = (abs(p.x) - b * (1.0 - t)) * k;
-  float dz = (abs(p.z) - b * (1.0 - t)) * k;
-  return max(max(dx, dz), -(p.y + 0.5 * h));
-}
-
-float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-
-void main() {
-  vec2 uv = (gl_FragCoord.xy - 0.5 * uRes) / min(uRes.x, uRes.y);
-  float cp = cos(uRot.x), sp = sin(uRot.x), cy = cos(uRot.y), sy = sin(uRot.y);
-  mat3 rx = mat3(1.0, 0.0, 0.0, 0.0, cp, -sp, 0.0, sp, cp);
-  mat3 ry = mat3(cy, 0.0, sy, 0.0, 1.0, 0.0, -sy, 0.0, cy);
-  R = rx * ry;
-
-  vec3 ro = vec3(0.0, 0.0, -uScale * 1.15);
-  vec3 rd = normalize(vec3(uv, 1.3));
-
-  // No hard surface: march through the pyramid and add up a soft, colored glow
-  // around its faces. The color shifts with distance from the surface, which
-  // spreads the light into a blurry spectrum.
-  float k = 2.0 - uGlow * 1.8;            // glow softness (higher "glow" = wider, softer)
-  float hue = uHue / 6.2831853 + uTime * 0.15;   // hueShift is in radians (1 = about 57 degrees)
-  float t = 0.0;
-  vec3 acc = vec3(0.0);
-  for (int i = 0; i < 64; i++) {
-    vec3 p = ro + rd * t;
-    float d = map(p);
-    float dt = max(abs(d) * 0.5, 0.12);
-    float h = hue + uFreq * (0.10 * d + 0.05 * (R * p).y + 0.03 * p.x);
-    float base = 1.0 - smoothstep(-0.5 * uHeight, 0.1 * uHeight, (R * p).y);   // 1 at the bottom of the prism, 0 above
-    acc += mix(hsv(h, 0.75, 1.0), vec3(1.0), base * 0.85) * exp(-abs(d) * k) * dt;   // white light at the base, spectrum above
-    t += dt;
-    if (t > 24.0) break;
-  }
-
-  vec3 col = 1.0 - exp(-acc * 0.25);      // 0.25 = brightness of the glow
-  col += (hash(gl_FragCoord.xy + floor(uTime * 60.0) * uNoise) - 0.5) * (0.006 + uNoise * 0.1);   // dither: no banding
-  float vig = smoothstep(1.4, 0.15, length(uv));
-  gl_FragColor = vec4(vec3(0.063) + col * 0.44 * vig, 1.0);   // 0.44 = overall brightness (was 0.55)
-}`;
-
-  const compile = (type, src) => {
-    const s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
-  };
-  const vs = compile(gl.VERTEX_SHADER, 'attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}');
-  const fs = compile(gl.FRAGMENT_SHADER, FS);
-  if (!vs || !fs) return;
-
-  const pg = gl.createProgram();
-  gl.attachShader(pg, vs);
-  gl.attachShader(pg, fs);
-  gl.linkProgram(pg);
-  if (!gl.getProgramParameter(pg, gl.LINK_STATUS)) return;
-  gl.useProgram(pg);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const loc = gl.getAttribLocation(pg, 'a');
-  gl.enableVertexAttribArray(loc);
-  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-
-  const u = n => gl.getUniformLocation(pg, n);
-  gl.uniform1f(u('uHeight'), P.height);
-  gl.uniform1f(u('uBase'), P.baseWidth);
-  gl.uniform1f(u('uScale'), P.scale);
-  gl.uniform1f(u('uHue'), P.hueShift);
-  gl.uniform1f(u('uFreq'), P.colorFrequency);
-  gl.uniform1f(u('uGlow'), P.glow);
-  gl.uniform1f(u('uNoise'), P.noise);
-  const uRes = u('uRes'), uTime = u('uTime'), uRot = u('uRot');
-
-  const RES = 0.5;   // render at half size: lighter on the GPU and softer
-  const resize = () => {
-    cv.width = Math.round(innerWidth * RES);
-    cv.height = Math.round(innerHeight * RES);
-    gl.viewport(0, 0, cv.width, cv.height);
-    gl.uniform2f(uRes, cv.width, cv.height);
-  };
-
-  let mx = 0.5, my = 0.5, yaw = 0.4, pitch = 0.25, raf = 0;
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  const draw = now => {
-    const time = (now / 1000) * P.timeScale;
-    // "hover" mode: the prism leans toward the pointer, with a slow sway
-    yaw += (((mx - 0.5) * 2.4 + Math.sin(time * 6) * 0.3) - yaw) * 0.05;
-    pitch += (((my - 0.5) * 0.9 + 0.25) - pitch) * 0.05;
-    gl.uniform1f(uTime, time);
-    gl.uniform2f(uRot, pitch, yaw);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-  };
-
-  const frame = now => {
-    if (root.dataset.theme !== 'dark') { raf = 0; return; }   // other themes: stop rendering
-    draw(now);
-    raf = requestAnimationFrame(frame);
-  };
-  const sync = () => {
-    if (root.dataset.theme !== 'dark' || raf) return;
-    if (still) draw(0); else raf = requestAnimationFrame(frame);
-  };
-
-  resize();
-  addEventListener('resize', () => { resize(); if (still) draw(0); });
-  addEventListener('pointermove', e => { mx = e.clientX / innerWidth; my = e.clientY / innerHeight; });
-  new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
-  sync();
-})();
 
 
 // ---------------------------------------------------------------------

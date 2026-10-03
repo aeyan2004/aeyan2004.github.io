@@ -20,20 +20,25 @@
    --line    borders                   --card    card background
    --g1..g3  glitch-canvas letters
    ===================================================================== */
+/* "solarized" is Solarized Dark: base03 #002b36 background, base1 #93a1a1 text, base3 #fdf6e3 headings,
+   base02 #073642 cards. The accent stays celadon. It has no WebGL Prism; that is only for "dark". */
 :root,
 [data-theme="solarized"] {
-  --bg: #fdf6e3;  --sec: #2f7a52;  --cel: #A8DCAB;  --white: #586e75;
-  --strong: #073642;  --dim: #657b83b3;  --line: #93a1a133;  --card: #eee8d5cc;
-  --g1: #a9cfa7;  --g2: #5a9a66;  --g3: #e6e6c8;
+  color-scheme: dark;
+  --bg: #002b36;  --sec: #A8DCAB;  --cel: #A8DCAB;  --white: #93a1a1;
+  --strong: #fdf6e3;  --dim: #839496;  --line: #93a1a126;  --card: #073642cc;
+  --g1: #3b8576;  --g2: #A8DCAB;  --g3: #0c3f4c;
 }
 
 [data-theme="light"] {
+  color-scheme: light;
   --bg: #f6f9f5;  --sec: #2f7a52;  --cel: #A8DCAB;  --white: #1f2a22;
   --strong: #000;  --dim: #1f2a2299;  --line: #1f2a221a;  --card: #ffffffcc;
   --g1: #a8dcab;  --g2: #4f9a6a;  --g3: #dcefde;
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg: #101010;  --sec: #A8DCAB;  --cel: #A8DCAB;  --white: #dfdfdf;
   --strong: #fff;  --dim: #f3f3f398;  --line: #f3f3f310;  --card: #1414149c;
   --g1: #4f7a55;  --g2: #A8DCAB;  --g3: #1b2a1d;
@@ -45,7 +50,7 @@
    ===================================================================== */
 @font-face {
   font-family: "Montserrat Variable";
-  src: url("../assets/fonts/montserrat-latin-wght-normal.woff2") format("woff2");
+  src: url("/assets/fonts/montserrat-latin-wght-normal.woff2") format("woff2");
   font-weight: 100 900;
   font-display: swap;
 }
@@ -370,15 +375,10 @@ h1 {
   margin-bottom: 24px;
 }
 
-.big .word {
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.big .vp {
-  display: inline-block;
-  font-variation-settings: "wght" 500;
-}
+/* Section titles use the React Bits VariableProximity (Roboto Flex). The global "*" rule at the top
+   would force Montserrat onto its letters, so this puts the font back. Delete it to keep Montserrat. */
+.variable-proximity,
+.variable-proximity * { font-family: 'Roboto Flex', sans-serif; }
 
 .grid {
   display: grid;
@@ -639,20 +639,18 @@ footer {
 
 
 /* =====================================================================
-   12. DARK-MODE PRISM BACKGROUND (canvas drawn by main.js)
+   12. DARK-MODE PRISM BACKGROUND (React Bits Prism, see src/components)
    ===================================================================== */
-#prism {
+#prism-bg {                  /* holds the Prism; opacity is switched by PrismBackground.jsx */
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
   z-index: -1;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.8s;
 }
 
-[data-theme="dark"] #prism { opacity: 1; }
+#prism-bg.on { opacity: 1; }
 
 
 /* =====================================================================
