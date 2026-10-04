@@ -738,7 +738,7 @@ footer {
   justify-items: center;
   background: var(--bg);
   overflow: hidden;
-  transition: transform 0.9s cubic-bezier(0.77, 0, 0.18, 1);
+  transition: transform calc(0.9s * var(--k, 1)) cubic-bezier(0.77, 0, 0.18, 1);
   animation: bye 0.9s 9s forwards;    /* failsafe: lifts by itself if the script never does */
 }
 
@@ -767,7 +767,7 @@ footer {
 }
 
 #loader h2 span.landed { opacity: 1; }
-#loader h2 span.x { transition: color 0.8s; }
+#loader h2 span.x { transition: color calc(0.8s * var(--k, 1)); }
 #loader h2 span.x.landed { color: var(--white); }
 
 /* ---- Brackets: appear after the letters land ---- */
@@ -778,7 +778,7 @@ footer {
   opacity: 0;
   color: var(--white);
   font-weight: 300;
-  transition: max-width 0.4s ease, opacity 0.4s ease;
+  transition: max-width calc(0.4s * var(--k, 1)) ease, opacity calc(0.4s * var(--k, 1)) ease;
 }
 
 #loader.br-in .br {
@@ -791,8 +791,8 @@ footer {
   max-width: 0;
   opacity: 0;
   letter-spacing: 0;
-  transition: max-width 0.8s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.5s ease,
-              letter-spacing 0.8s, color 0.8s;
+  transition: max-width calc(0.8s * var(--k, 1)) cubic-bezier(0.7, 0, 0.3, 1), opacity calc(0.5s * var(--k, 1)) ease,
+              letter-spacing calc(0.8s * var(--k, 1)), color calc(0.8s * var(--k, 1));
 }
 
 /* ---- Dashed orbit ring ---- */

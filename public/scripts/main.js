@@ -56,6 +56,8 @@ const loader = document.getElementById('loader');
 if (loader && root.classList.contains('seen')) loader.remove();
 else if (loader) {
   busy();
+  const K = 0.8;                            // loader speed: 0.8 = 20% faster (1 = original, lower = faster)
+  loader.style.setProperty('--k', K);       // the CSS transitions follow the same number
   const letters = [...loader.querySelectorAll('h2 span')];
   const sun = loader.querySelector('.sun');
   const ring = loader.querySelector('.orbit');
@@ -78,9 +80,9 @@ else if (loader) {
 
   // after the letters land: aeyan > [aeyan] > [ae], then the screen lifts
   const bracket = () => {
-    setTimeout(() => loader.classList.add('br-in'), 50);   // brackets appear
-    setTimeout(() => loader.classList.add('fold'), 900);   // "yan" folds away, [ae] slides to center
-    setTimeout(finish, 2050);                              // screen lifts
+    setTimeout(() => loader.classList.add('br-in'), 50 * K);   // brackets appear
+    setTimeout(() => loader.classList.add('fold'), 900 * K);   // "yan" folds away, [ae] slides to center
+    setTimeout(finish, 2050 * K);                              // screen lifts
   };
 
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -97,17 +99,18 @@ else if (loader) {
     const t0 = performance.now();
 
     const frame = now => {
-      const t = now - t0;
+      const t = (now - t0) / K;
       const cx = innerWidth / 2;
       const cy = innerHeight / 2;
       const R = clamp(Math.min(innerWidth, innerHeight) * 0.24, 80, 170);
+      const sunK = clamp(R / 130, 0.5, 1);   // sun shrinks on small screens so it stays clear of the letters
       const spin = t * Math.PI * 2 / 2800;
       const out = inOut(seg(t, 1200 - FASTER, LAND_AT));
       const inn = seg(t, 0, 600);
 
       loader.style.setProperty('--R', R + 'px');
       sun.style.opacity = inn * (1 - out);
-      sun.style.transform = `scale(${(0.6 + 0.4 * (1 - (1 - inn) ** 3)) * (1 - 0.7 * out)})`;  // zooms OUT as it fades
+      sun.style.transform = `scale(${sunK * (0.6 + 0.4 * (1 - (1 - inn) ** 3)) * (1 - 0.7 * out)})`;  // zooms OUT as it fades
       ring.style.opacity = 0.55 * seg(t, 200, 800) * (1 - out);
 
       letters.forEach((el, i) => {
