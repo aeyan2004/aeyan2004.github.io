@@ -11,8 +11,11 @@ import SectionTitle from '../components/SectionTitle.jsx';
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ian Palallos | Portfolio</title>
 <meta name="description" content="Ian Palallos - Computer Engineering graduate in system administration and IT support, based in Manila, Philippines.">
-<link rel="icon" href="/[ae].png">
-<script is:inline>document.documentElement.classList.add("js");try{document.documentElement.dataset.theme=localStorage["aeyan-theme"]||"solarized";sessionStorage.seen&&document.documentElement.classList.add("seen","ready")}catch(e){}</script>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/favicon.png">
+<script is:inline>document.documentElement.classList.add("js");try{document.documentElement.dataset.theme=localStorage["aeyan-theme"]||"solarized";sessionStorage.seen&&document.documentElement.classList.add("seen");}catch(e){document.documentElement.dataset.theme="solarized"}</script>
 </head>
 
 <body>
@@ -25,7 +28,7 @@ import SectionTitle from '../components/SectionTitle.jsx';
   <a href="/">Technical</a>
   <a href="/creatives">Creatives</a>
   <a href="#contact">Contact</a>
-  <div class="themes"><button data-t="solarized" aria-label="Solarized dark mode" title="Solarized dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5.9a3.96 3.96 0 0 0 5.6 5.6 5.6 5.6 0 1 1-5.6-5.6Z"/><path d="M19 4v4M17 6h4M3 20.5h18"/></svg></button><button data-t="light" aria-label="Light mode" title="Light"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></button><button data-t="dark" aria-label="Dark mode" title="Dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button></div>
+  <div class="themes"><button data-t="solarized" aria-label="Solarized dark mode" title="Solarized dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/></svg></button><button data-t="midnight" aria-label="Midnight mode" title="Midnight"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2m0 14v2m9-9h-2M5 12H3m12.95 6.95-1.41-1.41M8.46 8.46 7.05 7.05m9.9 0-1.41 1.41M8.46 15.54l-1.41 1.41"/><circle cx="12" cy="12" r="4"/></svg></button></div>
 </nav>
 
 <section id="home" class="wrap hero">
@@ -44,7 +47,7 @@ import SectionTitle from '../components/SectionTitle.jsx';
   <p class="typed">I do <span id="typed" class="accent"></span><span class="caret"></span></p>
   <div class="tools"><div class="track">
     <span>Windows &amp; Windows Server</span><span>Ubuntu Linux</span><span>Hardware Troubleshooting</span><span>Ticketing Systems</span><span>Astro &amp; React.js</span>
-    <span>Microsoft 365</span><span>Docker</span><span>pfSense</span><span>PC Assembly &amp; Disassembly</span><span>NAS Storage</span><span>Network Configuration &amp; Troubleshooting</span><span>Python &amp; Java</span>
+    <span>Microsoft 365</span><span>Docker</span><span>pfSense</span><span>PC Assembly &amp; Disassembly</span><span>NAS Storage</span><span>Network Configuration &amp; Troubleshooting</span><span>IT Asset Management</span>
   </div></div>
 </section>
 
@@ -71,7 +74,7 @@ import SectionTitle from '../components/SectionTitle.jsx';
     <h3>IT Support Intern</h3>
     <p class="meta">Teleperformance Philippines · Quezon City · March 2026 - May 2026</p>
     <ul>
-      <li>Delivered help desk and technical support for desktop workstations, peripherals, and software across multiple corporate accounts, resolving 25+ support tickets weekly with consistent positive feedback.</li>
+      <li>Delivered help desk and technical support for desktop workstations, peripherals, and software across multiple corporate accounts, resolving 25+ support tickets weekly with consistent positive customer feedback.</li>
       <li>Performed OS deployment and workstation reimaging via Virtual Desktop Infrastructure (VDI), streamlining setup time for new and replacement units.</li>
       <li>Managed IT asset inventory and coordinated hardware lifecycle management for 50+ endpoints, ensuring accurate tracking and timely turnaround.</li>
       <li>Diagnosed and resolved hardware, software, and connectivity issues, escalating complex cases to meet support turnaround targets.</li>
@@ -81,7 +84,7 @@ import SectionTitle from '../components/SectionTitle.jsx';
     <h3>System Administrator Intern</h3>
     <p class="meta">Cornersteel Systems Corporation · Mandaluyong City · July 2025 - September 2025</p>
     <ul>
-      <li>Deployed and maintained Linux-based services (Ubuntu, Docker, WordPress) supporting the company's application hosting environment, reducing manual deployment steps by approximately 30% through containerization.</li>
+      <li>Deployed and maintained Linux-based services (Ubuntu, Docker, WordPress) supporting the company's application hosting environment, reducing manual deployment steps by approximately 30% through automation and standardized configurations.</li>
       <li>Configured pfSense firewalls, NAS storage systems, reverse proxies, and SSL certificates, strengthening network security and organization.</li>
       <li>Performed system troubleshooting, scheduled maintenance, and network support tasks to ensure continuous and reliable operations across internal services.</li>
       <li>Monitored system and network health across Linux servers and pfSense infrastructure, resolving issues to minimize downtime.</li>
@@ -95,7 +98,7 @@ import SectionTitle from '../components/SectionTitle.jsx';
   <article class="entry"><img src="/assets/img/delivery.png" loading="lazy" decoding="async" alt="T.A.R.S. robot"><div>
     <h3>Transport and Autonomous Retrieval System (T.A.R.S.)</h3>
     <p class="meta">July 2026</p>
-    <ul><li>Built and programmed an autonomous indoor delivery robot using ROS 2, LiDAR-based SLAM, and the Nav2 Navigation Stack for localization, path planning, and obstacle avoidance, integrating a web-based interface for remote task execution.</li></ul>
+    <ul><li>Built and programmed an autonomous indoor delivery robot using ROS 2, LiDAR-based SLAM, and the Nav2 Navigation Stack for localization, path planning, and obstacle avoidance, integrating real-time navigation capability for delivery tasks.</li></ul>
   </div></article>
     <article class="entry"><img src="/assets/img/back.png" loading="lazy" decoding="async" alt="Smart Posture Correction Device"><div>
     <h3>Smart Posture Correction Device</h3>
@@ -138,8 +141,8 @@ import SectionTitle from '../components/SectionTitle.jsx';
   <SectionTitle client:load label="Certifications" />
   <!-- EDIT: replace the placeholder SVGs with photos/scans of your TESDA certificates -->
   <div class="grid">
-    <article class="cert"><img src="/assets/img/tesda.png" loading="lazy" decoding="async" alt="TESDA Computer System Servicing NC II certificate"><h3>Computer System Servicing NC II</h3><p class="muted">TESDA · Completed January 2025</p></article>
-    <article class="cert"><img src="/assets/img/tesda.png" loading="lazy" decoding="async" alt="TESDA Mechatronics Servicing NC II certificate"><h3>Mechatronics Servicing NC II</h3><p class="muted">TESDA · Completed November 2025</p></article>
+    <article class="cert"><img src="/assets/img/tesda.png" loading="lazy" decoding="async" alt="TESDA Computer System Servicing NC II certificate"><h3>Computer System Servicing NC II</h3><p class="muted">TESDA · 2025</p></article>
+    <article class="cert"><img src="/assets/img/tesda.png" loading="lazy" decoding="async" alt="TESDA Mechatronics Servicing NC II certificate"><h3>Mechatronics Servicing NC II</h3><p class="muted">TESDA · 2025</p></article>
   </div>
 </section>
 
