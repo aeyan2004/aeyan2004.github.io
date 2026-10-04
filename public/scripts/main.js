@@ -15,8 +15,9 @@
      9. REVEAL ON SCROLL
      10. SCROLL PROGRESS BAR
      11. SKILLS BACKGROUND: letter-glitch canvas
+     12. SKILLS ACCORDION: opens on hover
      13. CUSTOM ARROW CURSOR
-     14. SOCIAL LOGOS
+     14. SOCIAL LOGOS (+ phones: email opens the mail app)
    ===================================================================== */
 
 // ---------------------------------------------------------------------
@@ -89,7 +90,8 @@ else if (loader) {
     const fs = parseFloat(getComputedStyle(loader.querySelector('h2')).fontSize);
     const s0 = clamp(46 / fs, 0.4, 0.85);
     const RIGHT_TO_LEFT = false;            // true: letters land n-a-y-e-a instead of a-e-y-a-n
-    const LAND_AT = 2000, GAP = 240, DUR = 650;
+    const FASTER = 300;                     // ms trimmed off the orbiting part (raise it for a quicker intro)
+    const LAND_AT = 2000 - FASTER, GAP = 240, DUR = 650;
     const rank = i => (RIGHT_TO_LEFT ? letters.length - 1 - i : i);
     const lastEnd = LAND_AT + (letters.length - 1) * GAP + DUR;
     const t0 = performance.now();
@@ -100,7 +102,7 @@ else if (loader) {
       const cy = innerHeight / 2;
       const R = clamp(Math.min(innerWidth, innerHeight) * 0.24, 80, 170);
       const spin = t * Math.PI * 2 / 2800;
-      const out = inOut(seg(t, 1200, 2000));
+      const out = inOut(seg(t, 1200 - FASTER, LAND_AT));
       const inn = seg(t, 0, 600);
 
       loader.style.setProperty('--R', R + 'px');
@@ -217,13 +219,27 @@ Array.from(h1.childNodes).forEach(node => {
   if (node.nodeType !== 3) return;
 
   const frag = document.createDocumentFragment();
+  let word = null;   // each word gets its own no-wrap box, so a line can only break between words
 
   [...node.textContent].forEach(ch => {
+    if (ch === ' ') {
+      word = null;
+      frag.appendChild(document.createTextNode(' '));
+      n++;
+      return;
+    }
+
+    if (!word) {
+      word = document.createElement('span');
+      word.className = 'w';
+      frag.appendChild(word);
+    }
+
     const s = document.createElement('span');
     s.className = 'ch';
-    s.textContent = ch === ' ' ? '\u00A0' : ch;
+    s.textContent = ch;
     s.style.animationDelay = (n++ * 45) + 'ms';
-    frag.appendChild(s);
+    word.appendChild(s);
   });
 
   node.replaceWith(frag);
@@ -233,7 +249,7 @@ Array.from(h1.childNodes).forEach(node => {
 // ---------------------------------------------------------------------
 // 8. HERO: typing effect
 // ---------------------------------------------------------------------
-const WORDS = ['IT support', 'system administration', 'networking', 'hardware & software troubleshooting']; // EDIT
+const WORDS = ['IT support', 'system administration', 'networking', 'hardware troubleshooting', 'software troubleshooting']; // EDIT
 const out = document.getElementById('typed') || document.createElement('span');
 
 let w = 0;
@@ -313,9 +329,11 @@ const SIZE = 14;
 
 let cols = 0;
 let cells = [];
+let gw = 0;   // canvas size in CSS pixels (the bitmap itself is scaled up for sharp text)
+let gh = 0;
 
 function draw() {
-  g.clearRect(0, 0, c.width, c.height);
+  g.clearRect(0, 0, gw, gh);
   g.font = SIZE + 'px monospace';
   g.textBaseline = 'top';
 
@@ -329,12 +347,16 @@ function init() {
   if (!c) return;
   loadColors();
   const r = c.getBoundingClientRect();
-  c.width = r.width;
-  c.height = r.height;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  gw = r.width;
+  gh = r.height;
+  c.width = Math.round(gw * dpr);
+  c.height = Math.round(gh * dpr);
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  cols = Math.ceil(c.width / (SIZE * 0.75));
+  cols = Math.ceil(gw / (SIZE * 0.75));
   cells = Array.from(
-    { length: cols * Math.ceil(c.height / SIZE) },
+    { length: cols * Math.ceil(gh / SIZE) },
     () => ({ ch: pick(CHARS), color: pick(COLORS) })
   );
 
@@ -342,7 +364,12 @@ function init() {
 }
 
 init();
-window.addEventListener('resize', init);
+
+// On phones the address bar sliding in and out fires "resize" while scrolling; only rebuild if the width changed
+window.addEventListener('resize', () => {
+  if (c && Math.abs(c.getBoundingClientRect().width - gw) < 1) return;
+  init();
+});
 
 if (c && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
   // only animate while the canvas is on screen and the tab is visible
@@ -357,6 +384,26 @@ if (c && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
     draw();
   }, 60);
 }
+
+
+// ---------------------------------------------------------------------
+// 12. SKILLS ACCORDION: opens while hovered, closes when the pointer leaves.
+//     Keyboard focus opens it too; touch screens keep tap-to-toggle.
+// ---------------------------------------------------------------------
+const canHover = matchMedia('(hover: hover) and (pointer: fine)');
+let lastPointer = 'mouse';
+addEventListener('pointerdown', e => { lastPointer = e.pointerType; }, true);
+
+document.querySelectorAll('details').forEach(d => {
+  const mouseLike = e => e.pointerType === 'mouse' || e.pointerType === 'pen';
+  d.addEventListener('pointerenter', e => { if (mouseLike(e)) d.open = true; });
+  d.addEventListener('pointerleave', e => { if (mouseLike(e)) d.open = false; });
+  d.addEventListener('focusin', e => { if (e.target.matches(':focus-visible')) d.open = true; });
+  d.addEventListener('focusout', e => { if (!d.contains(e.relatedTarget)) d.open = false; });
+  d.querySelector('summary').addEventListener('click', e => {
+    if (canHover.matches && lastPointer !== 'touch') e.preventDefault();   // hover/focus drives it, not a click
+  });
+});
 
 
 // ---------------------------------------------------------------------
@@ -428,3 +475,14 @@ const ICONS = {
   steam: "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.253 0-2.265-1.014-2.265-2.265z\"/></svg>"
 };
 document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = ICONS[el.dataset.icon]; });
+
+// On phones, the email card opens the mail app (mailto:) instead of the Gmail website
+if (matchMedia('(pointer: coarse)').matches) {
+  document.querySelectorAll('a[href*="mail.google.com"]').forEach(a => {
+    const to = new URL(a.href).searchParams.get('to');
+    if (!to) return;
+    a.href = 'mailto:' + to;
+    a.removeAttribute('target');
+    a.removeAttribute('rel');
+  });
+}

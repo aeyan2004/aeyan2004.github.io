@@ -16,8 +16,12 @@ function useAnimationFrame(callback) {
   }, [callback]);
 }
 
+// On touch screens there is no mouse to follow. Tracking a finger here made every title re-measure its letters
+// on every frame while scrolling (janky), so the effect is mouse-only and the letters just stay at the base weight.
+const isTouchOnly = () => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches;
+
 function useMousePositionRef(containerRef) {
-  const positionRef = useRef({ x: 0, y: 0 });
+  const positionRef = useRef(isTouchOnly() ? { x: -9999, y: -9999 } : { x: 0, y: 0 });
 
   useEffect(() => {
     const updatePosition = (x, y) => {
@@ -35,6 +39,7 @@ function useMousePositionRef(containerRef) {
       updatePosition(touch.clientX, touch.clientY);
     };
 
+    if (isTouchOnly()) return;
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('touchmove', handleTouchMove);
     return () => {

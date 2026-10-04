@@ -43,7 +43,7 @@ import SectionTitle from '../components/SectionTitle.jsx';
   </div>
   <p class="typed">I do <span id="typed" class="accent"></span><span class="caret"></span></p>
   <div class="tools"><div class="track">
-    <span>Windows &amp; Windows Server</span><span>Ubuntu Linux</span><span>Hardware Troubleshooting</span><span>Ticketing Systems</span>
+    <span>Windows &amp; Windows Server</span><span>Ubuntu Linux</span><span>Hardware Troubleshooting</span><span>Ticketing Systems</span><span>Astro &amp; React.js</span>
     <span>Microsoft 365</span><span>Docker</span><span>pfSense</span><span>PC Assembly &amp; Disassembly</span><span>NAS Storage</span><span>Network Configuration &amp; Troubleshooting</span><span>Python &amp; Java</span>
   </div></div>
 </section>
@@ -52,17 +52,22 @@ import SectionTitle from '../components/SectionTitle.jsx';
   <p class="eyebrow">Where I studied</p>
   <SectionTitle client:load label="Education" />
   <!-- EDIT: swap assets/img/pup.svg for the real school logo/photo (keep the filename or change src) -->
-  <article class="entry"><img src="/assets/img/pup.png" alt="Polytechnic University of the Philippines"><div>
+  <article class="entry"><img src="/assets/img/pup.png" loading="lazy" decoding="async" alt="Polytechnic University of the Philippines"><div>
     <h3>Diploma in Computer Engineering Technology</h3>
     <p class="meta">Polytechnic University of the Philippines · Santa Mesa, Manila · Graduated September 2026</p>
-    <ul><li>Relevant coursework: Computer Networks, Database Systems, Operating Systems, Information Security</li></ul>
+    <ul><li>Relevant coursework: Computer Networks, Programming, Logic Circuits, Machine Learning, Graphics Design</li></ul>
+  </div></article>
+    <article class="entry"><img src="/assets/img/au.png" loading="lazy" decoding="async" alt="Arellano University"><div>
+    <h3>ICT - Information and Communications Technology</h3>
+    <p class="meta">Arellano University · Sampaloc, Manila · Graduated June 2023</p>
+    <ul><li>Relevant coursework: Programming, Graphics Design, Drawing, Animation</li></ul>
   </div></article>
 </section>
 
 <section id="experience" class="wrap block">
   <p class="eyebrow">My work</p>
   <SectionTitle client:load label="Experience" />
-  <article class="entry"><img src="/assets/img/tp.png" alt="Teleperformance Philippines"><div>
+  <article class="entry"><img src="/assets/img/tp.png" loading="lazy" decoding="async" alt="Teleperformance Philippines"><div>
     <h3>IT Support Intern</h3>
     <p class="meta">Teleperformance Philippines · Quezon City · March 2026 - May 2026</p>
     <ul>
@@ -72,7 +77,7 @@ import SectionTitle from '../components/SectionTitle.jsx';
       <li>Diagnosed and resolved hardware, software, and connectivity issues, escalating complex cases to meet support turnaround targets.</li>
     </ul>
   </div></article>
-  <article class="entry"><img src="/assets/img/csc.jpg" alt="Cornersteel Systems Corporation"><div>
+  <article class="entry"><img src="/assets/img/csc.jpg" loading="lazy" decoding="async" alt="Cornersteel Systems Corporation"><div>
     <h3>System Administrator Intern</h3>
     <p class="meta">Cornersteel Systems Corporation · Mandaluyong City · July 2025 - September 2025</p>
     <ul>
@@ -87,12 +92,22 @@ import SectionTitle from '../components/SectionTitle.jsx';
 <section id="projects" class="wrap block">
   <p class="eyebrow">What I built</p>
   <SectionTitle client:load label="Projects" />
-  <article class="entry"><img src="/assets/img/tars.svg" alt="T.A.R.S. robot"><div>
+  <article class="entry"><img src="/assets/img/delivery.png" loading="lazy" decoding="async" alt="T.A.R.S. robot"><div>
     <h3>Transport and Autonomous Retrieval System (T.A.R.S.)</h3>
     <p class="meta">July 2026</p>
     <ul><li>Built and programmed an autonomous indoor delivery robot using ROS 2, LiDAR-based SLAM, and the Nav2 Navigation Stack for localization, path planning, and obstacle avoidance, integrating a web-based interface for remote task execution.</li></ul>
   </div></article>
-  <article class="entry"><img src="/assets/img/fur-real.svg" alt="Fur Real Pet Supplies website"><div>
+    <article class="entry"><img src="/assets/img/back.png" loading="lazy" decoding="async" alt="Smart Posture Correction Device"><div>
+    <h3>Smart Posture Correction Device</h3>
+    <p class="meta">July 2025</p>
+    <ul><li>Designed and built a posture-monitoring device using Arduino and flex sensors that alerts users when slouching, improving ergonomic awareness.</li></ul>
+  </div></article>
+      <article class="entry"><img src="/assets/img/voting-box.png" loading="lazy" decoding="async" alt="Online Voting System Website"><div>
+    <h3>Online Voting System Website</h3>
+    <p class="meta">June 2025</p>
+    <ul><li>Created an online voting system with Java, JavaScript, CSS, and Apache Derby; built a functional user interface and integrated database support.</li></ul>
+  </div></article>
+  <article class="entry"><img src="/assets/img/shopping.png" loading="lazy" decoding="async" alt="Fur Real Pet Supplies website"><div>
     <h3>Fur Real Pet Supplies Website</h3>
     <p class="meta">July 2024</p>
     <ul><li>Developed a full-stack e-commerce web application using Java, JavaScript, CSS, and MySQL, implementing database-driven product management and an improved user interface.</li></ul>
@@ -109,7 +124,7 @@ import SectionTitle from '../components/SectionTitle.jsx';
       <details><summary>Networking</summary><p>pfSense Firewalls, TCP/IP, Network Configuration &amp; Troubleshooting</p></details>
       <details><summary>IT Support / Help Desk</summary><p>Hardware Troubleshooting, OS Installation &amp; Deployment, Remote Support, Ticketing Systems, PC Assembly &amp; Disassembly, IT Asset Management</p></details>
       <details><summary>Productivity &amp; Collaboration</summary><p>Microsoft 365 Administration, Google Workspace</p></details>
-      <details><summary>Programming &amp; Databases</summary><p>Java, Python, MySQL, MariaDB</p></details>
+      <details><summary>Programming &amp; Databases</summary><p>Java, Python, HTML, CSS, JavaScript, Astro, React.js, MySQL, MariaDB</p></details>
       <details><summary>Tools</summary><p>Git, VS Code, Command Prompt, PowerShell</p></details>
       <details><summary>Additional</summary><p>Arduino, Programmable Logic Controllers (PLC), Ladder Logic, Sensors &amp; Pneumatics</p></details>
       <details><summary>Languages &amp; Interests</summary><p>Filipino (fluent), English (proficient). PC Building &amp; Hardware Upgrading, Drawing, Cinematography, Graphics Design, Photo &amp; Video Editing</p></details>
@@ -123,8 +138,8 @@ import SectionTitle from '../components/SectionTitle.jsx';
   <SectionTitle client:load label="Certifications" />
   <!-- EDIT: replace the placeholder SVGs with photos/scans of your TESDA certificates -->
   <div class="grid">
-    <article class="cert"><img src="/assets/img/tesda.png" alt="TESDA Computer System Servicing NC II certificate"><h3>Computer System Servicing NC II</h3><p class="muted">TESDA · Completed January 2025</p></article>
-    <article class="cert"><img src="/assets/img/tesda.png" alt="TESDA Mechatronics Servicing NC II certificate"><h3>Mechatronics Servicing NC II</h3><p class="muted">TESDA · Completed November 2025</p></article>
+    <article class="cert"><img src="/assets/img/tesda.png" loading="lazy" decoding="async" alt="TESDA Computer System Servicing NC II certificate"><h3>Computer System Servicing NC II</h3><p class="muted">TESDA · Completed January 2025</p></article>
+    <article class="cert"><img src="/assets/img/tesda.png" loading="lazy" decoding="async" alt="TESDA Mechatronics Servicing NC II certificate"><h3>Mechatronics Servicing NC II</h3><p class="muted">TESDA · Completed November 2025</p></article>
   </div>
 </section>
 
